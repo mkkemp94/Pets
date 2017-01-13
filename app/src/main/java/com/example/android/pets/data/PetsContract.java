@@ -15,10 +15,10 @@ public final class PetsContract {
     public static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + PetEntry.TABLE_NAME + " (" +
                     PetEntry.COLUMN_ID + " INTEGER PRIMARY KEY," +
-                    PetEntry.COLUMN_PET_NAME + " TEXT," +
+                    PetEntry.COLUMN_PET_NAME + " TEXT NOT NULL," +
                     PetEntry.COLUMN_PET_BREED + " TEXT," +
-                    PetEntry.COLUMN_PET_GENDER + " INTEGER," +
-                    PetEntry.COLUMN_PET_WEIGHT + " INTEGER)";
+                    PetEntry.COLUMN_PET_GENDER + " INTEGER NOT NULL," +
+                    PetEntry.COLUMN_PET_WEIGHT + " INTEGER NOT NULL DEFAULT 0);";
 
     // Drop table pets
     public static final String SQL_DELETE_ENTRIES =

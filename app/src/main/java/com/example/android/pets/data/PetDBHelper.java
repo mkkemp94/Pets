@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static com.example.android.pets.data.PetsContract.SQL_CREATE_ENTRIES;
 import static com.example.android.pets.data.PetsContract.SQL_DELETE_ENTRIES;
 
 /**
@@ -22,11 +21,20 @@ public class PetDBHelper extends SQLiteOpenHelper {
 
     }
 
+    // On create, make a table
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        String SQL_CREATE_PETS_TABLE =
+                "CREATE TABLE " + PetsContract.PetEntry.TABLE_NAME + " (" +
+                        PetsContract.PetEntry.COLUMN_ID + " INTEGER PRIMARY KEY," +
+                        PetsContract.PetEntry.COLUMN_PET_NAME + " TEXT NOT NULL," +
+                        PetsContract.PetEntry.COLUMN_PET_BREED + " TEXT," +
+                        PetsContract.PetEntry.COLUMN_PET_GENDER + " INTEGER NOT NULL," +
+                        PetsContract.PetEntry.COLUMN_PET_WEIGHT + " INTEGER NOT NULL DEFAULT 0);";
+        db.execSQL(SQL_CREATE_PETS_TABLE);
     }
 
+    // On upgrade, delete and remake table
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_ENTRIES);
