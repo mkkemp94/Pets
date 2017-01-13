@@ -16,12 +16,18 @@
 package com.example.android.pets;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.example.android.pets.data.PetDBHelper;
+import com.example.android.pets.data.PetsContract.PetEntry;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -42,10 +48,39 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Display database
+        displayDatabaseInfo();
+    }
+
+    /**
+     * Temporary
+     */
+    private void displayDatabaseInfo() {
+
+        // To access database
+        PetDBHelper mDbHelper = new PetDBHelper(this);
+
+        // Create and/or open database to read
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Perform raw SQL query to get a Cursor that contains all rows from the pets table
+        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+        try {
+
+            // Display number of rows in cursor
+            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+        } finally {
+
+            // Always close the cursor after you're done
+            cursor.close();
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         // Inflate the menu options from the res/menu/menu_catalog.xml file.
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_catalog, menu);
@@ -54,6 +89,7 @@ public class CatalogActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
