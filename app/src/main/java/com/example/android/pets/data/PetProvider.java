@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.android.pets.data.PetsContract.PetEntry;
+
 /**
  * {@link ContentProvider} for Pets app.
  */
@@ -74,7 +76,7 @@ public class PetProvider extends ContentProvider {
                 // "content://com.example.android.pets/pets/
 
                 // Perform a query on whole table pets
-                cursor = database.query(PetsContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder );
+                cursor = database.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder );
 
                 break;
             case PET_ID:
@@ -82,11 +84,11 @@ public class PetProvider extends ContentProvider {
                 // "content://com.example.android.pets/pets/3
 
                 // Extract out the ID from the uri ( SELECT ... FROM pets WHERE ID = "3" )
-                selection = PetsContract.PetEntry.COLUMN_ID + "=?";
+                selection = PetEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri))};
 
                 // Perform query on pets table where _id equals 3 to return a cursor containing that row
-                cursor = database.query(PetsContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                cursor = database.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 
                 break;
             default:
@@ -113,6 +115,24 @@ public class PetProvider extends ContentProvider {
     }
 
     private Uri insertPet(Uri uri, ContentValues contentValues) {
+
+        // Check that the name is not null
+        String name = contentValues.getAsString(PetEntry.COLUMN_PET_NAME);
+        if (name == null) {
+            throw new IllegalArgumentException("Pet requires a name");
+        }
+
+        // Check that the gender is 1, 2, or 0
+        Integer gender = contentValues.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+        if (gender == null || !PetEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException("Pet requires valid gender");
+        }
+
+        // Check that the weight is valid
+        Integer weight = contentValues.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+        if (weight != null && weight <= 0) {
+            throw new IllegalArgumentException("Pet requires a valid weight");
+        }
 
         // Access database
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
