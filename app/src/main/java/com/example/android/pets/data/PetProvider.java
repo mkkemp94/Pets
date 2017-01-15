@@ -247,10 +247,20 @@ public class PetProvider extends ContentProvider {
     }
 
     /**
-     * Returns the MIME type of data for the content URI.
+     * Returns the MIME type (content type) of data for the content URI.
      */
     @Override
     public String getType(Uri uri) {
-        return null;
+
+        // Find what kind of uri we passed int
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            case PET_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 }
