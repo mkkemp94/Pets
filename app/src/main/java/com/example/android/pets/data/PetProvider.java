@@ -1,9 +1,13 @@
 package com.example.android.pets.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * {@link ContentProvider} for Pets app.
@@ -13,8 +17,28 @@ public class PetProvider extends ContentProvider {
     /** Tag for the log messages */
     public static final String LOG_TAG = PetProvider.class.getSimpleName();
 
-    // To access pet database
+    // Object to access pet database
     private PetDBHelper mDbHelper;
+
+    // Code for pets table
+    private static final int PETS = 100;
+
+    // Code for single pet in table
+    private static final int PET_ID = 101;
+
+    // Matches content uri to its corresponding code (table or single pet)
+    // Constructor is code to return for the root uri
+    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+    /**
+     * Static initializer. This is run the first time anything is called from this class.
+     */
+    static {
+
+        // Content uri patterns the provider should recognize, followed by codes to return when match is found
+        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
+        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "/#", PET_ID);
+    }
 
     /**
      * Initialize the provider and the database helper object
@@ -33,7 +57,43 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+
+        // Access database
+        SQLiteDatabase database = mDbHelper.getReadableDatabase();
+
+        // What is returned from query
+        Cursor cursor;
+
+        // Find out what kind of input uri was passed in
+        int match = sUriMatcher.match(uri);
+
+        // Decide which path to go down
+        switch (match) {
+            case PETS:
+
+                // "content://com.example.android.pets/pets/
+
+                // Perform a query on whole table pets
+                cursor = database.query(PetsContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder );
+
+                break;
+            case PET_ID:
+
+                // "content://com.example.android.pets/pets/3
+
+                // Extract out the ID from the uri ( SELECT ... FROM pets WHERE ID = "3" )
+                selection = PetsContract.PetEntry.COLUMN_ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri))};
+
+                // Perform query on pets table where _id equals 3 to return a cursor containing that row
+                cursor = database.query(PetsContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+
+                break;
+            default:
+                throw new IllegalArgumentException("Cannot query unknown URI " + uri);
+        }
+
+        return cursor;
     }
 
     /**
@@ -41,7 +101,33 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        return null;
+
+        // Find what kind of uri was passed in
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return insertPet(uri, contentValues);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
+    }
+
+    private Uri insertPet(Uri uri, ContentValues contentValues) {
+
+        // Access database
+        SQLiteDatabase database = mDbHelper.getReadableDatabase();
+
+        // Insert a new pet into the pets database table with the given ContentValues
+        long id = database.insert(PetsContract.PetEntry.TABLE_NAME, null, contentValues);
+
+        // If insertion failed, log an error and return null
+        if (id == -1) {
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
+
+        // Return the new URI with the ID of the new row inserted at the end
+        return ContentUris.withAppendedId(uri, id);
     }
 
     /**

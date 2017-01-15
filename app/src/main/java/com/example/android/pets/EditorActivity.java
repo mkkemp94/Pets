@@ -16,7 +16,7 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +30,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.android.pets.data.PetDBHelper;
 import com.example.android.pets.data.PetsContract.PetEntry;
 
 /**
@@ -115,32 +114,29 @@ public class EditorActivity extends AppCompatActivity {
      */
     private void insertPet() {
 
-        // Instantiate database
-        PetDBHelper myDBHelper = new PetDBHelper(this);
-
-        // Get database for writing
-        SQLiteDatabase db = myDBHelper.getWritableDatabase();
-
         // Add values to insert into database
         ContentValues values = new ContentValues();
 
+        // Get text from edit text fields
         String nameString = mNameEditText.getText().toString().trim();
         String breedString = mBreedEditText.getText().toString().trim();
         int genderInt = mGender;
         int weightInt = Integer.parseInt(mWeightEditText.getText().toString().trim());
 
+        // Map values to their respective keys
         values.put(PetEntry.COLUMN_PET_NAME, nameString);
         values.put(PetEntry.COLUMN_PET_BREED, breedString);
         values.put(PetEntry.COLUMN_PET_GENDER, genderInt);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightInt);
 
-        // Insert into database and return response
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
+        // Insert into database through content resolver
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
 
-        if (newRowId == -1) {
-            Toast.makeText(this, "ERROR : New pet not added.", Toast.LENGTH_SHORT).show();
+        // Was insertion successful?
+        if (newUri == null) {
+            Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "New pet added to row " + newRowId, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_SHORT).show();
         }
     }
 

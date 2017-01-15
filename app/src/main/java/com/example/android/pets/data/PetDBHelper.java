@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static com.example.android.pets.data.PetsContract.SQL_DELETE_ENTRIES;
-
 /**
  * Created by kempm on 1/12/2017.
  */
@@ -37,6 +35,8 @@ public class PetDBHelper extends SQLiteOpenHelper {
     // On upgrade, delete and remake table
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + PetsContract.PetEntry.TABLE_NAME;
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }

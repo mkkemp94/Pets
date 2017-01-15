@@ -1,5 +1,6 @@
 package com.example.android.pets.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -11,24 +12,23 @@ public final class PetsContract {
     // Constructor
     private PetsContract() { }
 
-    // Create table pets
-    public static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + PetEntry.TABLE_NAME + " (" +
-                    PetEntry.COLUMN_ID + " INTEGER PRIMARY KEY," +
-                    PetEntry.COLUMN_PET_NAME + " TEXT NOT NULL," +
-                    PetEntry.COLUMN_PET_BREED + " TEXT," +
-                    PetEntry.COLUMN_PET_GENDER + " INTEGER NOT NULL," +
-                    PetEntry.COLUMN_PET_WEIGHT + " INTEGER NOT NULL DEFAULT 0);";
+    // Content Authority is used to help identify the Content Provider
+    public static final String CONTENT_AUTHORITY = "com.example.android.pets";
 
-    // Drop table pets
-    public static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + PetEntry.TABLE_NAME;
+    // Base Content URI with scheme
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    // Path for table to get from content URI
+    public static final String PATH_PETS = "pets";
 
     // Pet entry table
     public static final class PetEntry implements BaseColumns {
 
         // Table name
         public static final String TABLE_NAME = "pets";
+
+        // Full URI
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
 
         // Columns
         public static final String COLUMN_ID = BaseColumns._ID;
