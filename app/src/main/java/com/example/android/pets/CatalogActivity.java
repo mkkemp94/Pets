@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.pets.data.PetsContract.PetEntry;
@@ -59,25 +61,35 @@ public class CatalogActivity extends AppCompatActivity
             }
         });
 
-        // Names of columns to call from the table
-        String[] projection = {
-                PetEntry._ID,
-                PetEntry.COLUMN_PET_NAME,
-                PetEntry.COLUMN_PET_BREED,
-                PetEntry.COLUMN_PET_GENDER,
-                PetEntry.COLUMN_PET_WEIGHT
-        };
-
         // List view for displaying the pet data
-        ListView displayView = (ListView) findViewById(R.id.list_view_pet);
+        ListView listView = (ListView) findViewById(R.id.list_view_pet);
 
         // Empty view for when there are no pets in the list
         View emptyView = findViewById(R.id.empty_view);
-        displayView.setEmptyView(emptyView);
+        listView.setEmptyView(emptyView);
 
         // Set up adapter using data from cursor
         petCursorAdapter = new PetCursorAdapter(this, null);
-        displayView.setAdapter(petCursorAdapter);
+        listView.setAdapter(petCursorAdapter);
+
+        // Set up on item click listener
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
+                // Get uri for this specific pet
+                Uri uri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+
+                // Create intent to editor activty. Pass it additional data: the uri of tapped item
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                //intent.putExtra("petUri", uri.toString());
+                intent.setData(uri);
+
+                // Go to editor activity
+                startActivity(intent);
+
+            }
+        });
 
         // Prepare the loader. Either reconnect or create new one
         getLoaderManager().initLoader(PET_LOADER, null, this);
