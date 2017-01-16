@@ -28,7 +28,7 @@ public final class PetsContract {
         // Table name
         public static final String TABLE_NAME = "pets";
 
-        // Full URI
+        // Full URI : content://com.example.android.pets/pets
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
 
         // MIME type of the CONTENT URI for a list of pets
