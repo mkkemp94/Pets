@@ -95,6 +95,10 @@ public class PetProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
+        // Set notification URI on the cursor so we know the content URI that the cursor was created for.
+        // If the data at this URI changes, we know we need to update the cursor.
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
         return cursor;
     }
 
@@ -146,6 +150,9 @@ public class PetProvider extends ContentProvider {
             return null;
         }
 
+        // Notify listeners that there's been a data change for the pet content URI
+        getContext().getContentResolver().notifyChange(uri, null);
+
         // Return the new URI with the ID of the new row inserted at the end
         return ContentUris.withAppendedId(uri, id);
     }
@@ -173,7 +180,6 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Update is not suoorted for " + uri);
         }
-
     }
 
     /**
@@ -214,8 +220,17 @@ public class PetProvider extends ContentProvider {
         // Access database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
+
         // Update selected pets with the given ContentValues. Return the number of rows affected
-        return database.update(PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        int rowsUpdated =  database.update(PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+
+        // If 1 or more rows were updated, notify listeners that there has been a change
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows updated
+        return rowsUpdated;
     }
 
     /**
@@ -225,6 +240,9 @@ public class PetProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 
+        // Track the number of rows deleted
+        int rowsDeleted = 0;
+
         // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
@@ -233,17 +251,25 @@ public class PetProvider extends ContentProvider {
         switch (match) {
             case PETS:
                 // Delete all rows that match the selection and selection args
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
 
             case PET_ID:
                 // Delete a single row given by the ID in the URI
                 selection = PetEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
 
-            default:
-                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+            //default:
+                //   throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+
+        // If 1 or more rows were delected, notify listeners that there has been a change
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows deleted
+        return rowsDeleted;
     }
 
     /**
