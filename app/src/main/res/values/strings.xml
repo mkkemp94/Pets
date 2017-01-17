@@ -70,4 +70,7 @@
     <string name="editor_activity_title_edit_pet">Edit pet</string>
     <string name="pet_not_updated">ERROR : Pet not updated</string>
     <string name="pet_successfully_updated">Pet successfully updated</string>
+    <string name="unsaved_changes_dialog_msg">Discard your changed and quit editing?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
 </resources>
