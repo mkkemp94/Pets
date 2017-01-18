@@ -105,6 +105,9 @@ public class EditorActivity extends AppCompatActivity
 
             // Set title to add pet
             setTitle(getString(R.string.editor_activity_title_add_pet));
+
+            // Don't show menu with delete option
+            invalidateOptionsMenu();
         }
 
         // Find all relevant views that we will need to read user input from
@@ -248,6 +251,18 @@ public class EditorActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        // If this is  anew pet, hide the "delete" menu item
+        if (mCurrentPetUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -261,7 +276,7 @@ public class EditorActivity extends AppCompatActivity
 
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            
+
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Save pet to database
