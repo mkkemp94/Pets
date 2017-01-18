@@ -90,4 +90,7 @@
     <string name="cancel">Cancel</string>
     <string name="pet_not_deleted">Error : Pet not deleted</string>
     <string name="pet_deleted">Pet deleted</string>
+
+    <!-- Label for the pet's breed if the breed is unknown [CHAR LIMIT=20] -->
+    <string name="unknown_breed">Unknown breed</string>
 </resources>
